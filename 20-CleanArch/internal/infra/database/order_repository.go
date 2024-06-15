@@ -34,3 +34,45 @@ func (r *OrderRepository) GetTotal() (int, error) {
 	}
 	return total, nil
 }
+
+func (r *OrderRepository) FindAll() ([]entity.Order, error) {
+
+	orders := []entity.Order{}
+
+	rows, err := r.Db.Query(`
+		select 
+			id, price, tax
+		from
+			orders`)
+
+	if err != nil {
+		return orders, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+
+		var id string
+		var price float64
+		var tax float64
+
+		if err := rows.Scan(&id, &price, &tax); err != nil {
+			return orders, err
+		}
+
+		order, err := entity.NewOrder(id, price, tax)
+
+		if err != nil {
+			return orders, err
+		}
+
+		if err = order.CalculateFinalPrice(); err != nil {
+			return orders, err
+		}
+
+		orders = append(orders, *order)
+	}
+
+	return orders, nil
+}
