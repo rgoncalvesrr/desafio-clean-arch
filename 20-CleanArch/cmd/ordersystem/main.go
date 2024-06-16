@@ -10,6 +10,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/rgoncalvesrr/desafio-clean-arch/configs"
 	"github.com/rgoncalvesrr/desafio-clean-arch/internal/event/handler"
+	"github.com/rgoncalvesrr/desafio-clean-arch/internal/infra/database"
 	"github.com/rgoncalvesrr/desafio-clean-arch/internal/infra/graph"
 	"github.com/rgoncalvesrr/desafio-clean-arch/internal/infra/grpc/pb"
 	"github.com/rgoncalvesrr/desafio-clean-arch/internal/infra/grpc/service"
@@ -34,6 +35,10 @@ func main() {
 		panic(err)
 	}
 	defer db.Close()
+
+	if err = database.Migrate(db); err != nil {
+		panic(err)
+	}
 
 	rabbitMQChannel := getRabbitMQChannel()
 
